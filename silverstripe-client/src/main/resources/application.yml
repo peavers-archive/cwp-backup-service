@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: instance-service
+
+server:
+  port: 9090

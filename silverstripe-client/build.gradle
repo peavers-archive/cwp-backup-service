@@ -1,0 +1,11 @@
+jar {
+    baseName = 'silverstripe-client'
+}
+
+dependencies {
+    compile('org.springframework.boot:spring-boot-starter-actuator')
+    compile('org.springframework.boot:spring-boot-starter-data-mongodb-reactive')
+    compile('org.springframework.boot:spring-boot-starter-webflux')
+
+    compile('com.github.jasminb:jsonapi-converter:0.8')
+}

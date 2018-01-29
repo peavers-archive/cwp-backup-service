@@ -1,0 +1,5 @@
+rootProject.name = 'cwp-backup-service'
+
+include 'silverstripe-service'
+include 'silverstripe-client'
+
