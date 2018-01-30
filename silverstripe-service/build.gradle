@@ -9,6 +9,7 @@ jar {
 dependencyManagement {
     imports {
         mavenBom 'software.amazon.awssdk:bom:2.0.0-preview-7'
+        mavenBom 'com.amazonaws:aws-java-sdk-bom:1.11.228'
     }
 }
 
@@ -16,8 +17,9 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-actuator')
     compile('org.springframework.boot:spring-boot-starter-webflux')
 
+    compile ('com.amazonaws:aws-java-sdk-s3')
+
     compile('com.github.Ullink:simple-slack-api:1.2.0')
     compile('commons-io:commons-io:2.6')
     compile('com.github.jasminb:jsonapi-converter:0.8')
-    compile('software.amazon.awssdk:s3')
 }
