@@ -10,10 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 class BaseResource {
-    @Id
-    String id;
+  @Id String id;
 
-    @Links
-    com.github.jasminb.jsonapi.Links links;
-
+  @Links com.github.jasminb.jsonapi.Links links;
 }

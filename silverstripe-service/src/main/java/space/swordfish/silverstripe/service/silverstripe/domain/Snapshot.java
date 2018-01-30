@@ -15,16 +15,16 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Type("snapshots")
 public class Snapshot extends BaseResource {
-    String created;
-    String mode;
-    String size;
+  String created;
+  String mode;
+  String size;
 
-    @JsonProperty("can_download")
-    String canDownload;
+  @JsonProperty("can_download")
+  String canDownload;
 
-    @JsonProperty("can_delete")
-    String canDelete;
+  @JsonProperty("can_delete")
+  String canDelete;
 
-    @JsonProperty("snapshot_status")
-    String snapshotStatus;
+  @JsonProperty("snapshot_status")
+  String snapshotStatus;
 }

@@ -13,32 +13,35 @@ import java.util.List;
 
 public class ClientResource {
 
-    Mono<Transfer> transformPayloadToTransfer(ResponseEntity<String> payload) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ResourceConverter resourceConverter = new ResourceConverter(objectMapper, Transfer.class);
+  Mono<Transfer> transformPayloadToTransfer(ResponseEntity<String> payload) {
+    ObjectMapper objectMapper = new ObjectMapper();
+    ResourceConverter resourceConverter = new ResourceConverter(objectMapper, Transfer.class);
 
-        Transfer transfer = resourceConverter.readDocument(payload.getBody().getBytes(), Transfer.class).get();
+    Transfer transfer =
+        resourceConverter.readDocument(payload.getBody().getBytes(), Transfer.class).get();
 
-        return Mono.just(transfer);
-    }
+    return Mono.just(transfer);
+  }
 
-    Flux<Stack> transformPayloadToStack(ResponseEntity<String> payload) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ResourceConverter resourceConverter = new ResourceConverter(objectMapper, Stack.class);
+  Flux<Stack> transformPayloadToStack(ResponseEntity<String> payload) {
+    ObjectMapper objectMapper = new ObjectMapper();
+    ResourceConverter resourceConverter = new ResourceConverter(objectMapper, Stack.class);
 
-        List<Stack> stackList = resourceConverter.readDocumentCollection(payload.getBody().getBytes(), Stack.class).get();
+    List<Stack> stackList =
+        resourceConverter.readDocumentCollection(payload.getBody().getBytes(), Stack.class).get();
 
-        return Flux.fromIterable(stackList);
-    }
+    return Flux.fromIterable(stackList);
+  }
 
-    Flux<Snapshot> transformPayloadToSnapshot(ResponseEntity<String> payload) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ResourceConverter resourceConverter = new ResourceConverter(objectMapper, Snapshot.class);
+  Flux<Snapshot> transformPayloadToSnapshot(ResponseEntity<String> payload) {
+    ObjectMapper objectMapper = new ObjectMapper();
+    ResourceConverter resourceConverter = new ResourceConverter(objectMapper, Snapshot.class);
 
-        List<Snapshot> stackList = resourceConverter.readDocumentCollection(payload.getBody().getBytes(), Snapshot.class).get();
+    List<Snapshot> stackList =
+        resourceConverter
+            .readDocumentCollection(payload.getBody().getBytes(), Snapshot.class)
+            .get();
 
-        return Flux.fromIterable(stackList);
-    }
-
-
+    return Flux.fromIterable(stackList);
+  }
 }

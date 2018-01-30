@@ -6,8 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class SilverstripeClientApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(SilverstripeClientApplication.class, args);
-    }
-
+  public static void main(String[] args) {
+    SpringApplication.run(SilverstripeClientApplication.class, args);
+  }
 }

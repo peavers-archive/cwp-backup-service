@@ -33,75 +33,71 @@ import static space.swordfish.silverstripe.service.service.SigningService.presig
 @Controller
 public class AmazonController {
 
-    @Value(value = "${silverstripe.username}")
-    private String username;
+  private final SlackService slackService;
+  @Value(value = "${silverstripe.username}")
+  private String username;
+  @Value(value = "${silverstripe.token}")
+  private String token;
+  @Value(value = "${aws.bucket}")
+  private String bucket;
 
-    @Value(value = "${silverstripe.token}")
-    private String token;
+  public AmazonController(SlackService slackService) {
+    this.slackService = slackService;
+  }
 
-    @Value(value = "${aws.bucket}")
-    private String bucket;
+  @PostMapping("/amazon/{projectId}/upload")
+  @ResponseBody
+  public Mono<String> upload(@PathVariable String projectId, @RequestBody String downloadLink)
+      throws IOException {
+    final String key = projectId + "/" + LocalDate.now() + ".sspak";
 
-    private final SlackService slackService;
+    InputStream inputStream = getFileDownloadStream(downloadLink);
+    ByteArrayResource byteArrayResource = new ByteArrayResource(IOUtils.toByteArray(inputStream));
 
-    public AmazonController(SlackService slackService) {
-        this.slackService = slackService;
-    }
+    File file = new File("/tmp/" + key);
+    FileUtils.copyInputStreamToFile(byteArrayResource.getInputStream(), file);
 
-    @PostMapping("/amazon/{projectId}/upload")
-    @ResponseBody
-    public Mono<String> upload(@PathVariable String projectId, @RequestBody String downloadLink) throws IOException {
-        final String key = projectId + "/" + LocalDate.now() + ".sspak";
+    uploadFile(byteArrayResource, file, key, projectId);
 
-        InputStream inputStream = getFileDownloadStream(downloadLink);
-        ByteArrayResource byteArrayResource = new ByteArrayResource(IOUtils.toByteArray(inputStream));
+    return Mono.just(downloadLink);
+  }
 
-        File file = new File("/tmp/" + key);
-        FileUtils.copyInputStreamToFile(byteArrayResource.getInputStream(), file);
+  private void uploadFile(ByteArrayResource resource, File file, String key, String projectId)
+      throws IOException {
+    FileUtils.copyInputStreamToFile(resource.getInputStream(), file);
 
-        uploadFile(byteArrayResource, file, key, projectId);
+    S3AsyncClient client = S3AsyncClient.create();
+    CompletableFuture<PutObjectResponse> future =
+        client.putObject(
+            PutObjectRequest.builder().bucket(bucket).key(key).build(),
+            AsyncRequestProvider.fromFile(Paths.get(file.toURI())));
 
-        return Mono.just(downloadLink);
-    }
+    future.whenComplete(
+        (response, err) -> {
+          String path = presignS3DownloadLink(bucket, projectId + "/" + file.getName()).toString();
 
-    private void uploadFile(ByteArrayResource resource, File file, String key, String projectId) throws IOException {
-        FileUtils.copyInputStreamToFile(resource.getInputStream(), file);
+          slackService.snapshotComplete(projectId, path, "database", "production");
 
-        S3AsyncClient client = S3AsyncClient.create();
-        CompletableFuture<PutObjectResponse> future = client.putObject(
-                PutObjectRequest.builder()
-                        .bucket(bucket)
-                        .key(key)
-                        .build(),
-                AsyncRequestProvider.fromFile(Paths.get(file.toURI()))
-        );
-
-        future.whenComplete((response, err) -> {
-            String path = presignS3DownloadLink(bucket, projectId + "/" + file.getName()).toString();
-
-            slackService.snapshotComplete(projectId, path, "database", "production");
-
-            file.delete();
+          file.delete();
         });
+  }
+
+  private InputStream getFileDownloadStream(String location) {
+    final String link = location.replaceAll("\"", "");
+    final String authString = username + ":" + token;
+
+    try {
+      URL url = new URL(link);
+      URLConnection urlConnection = url.openConnection();
+
+      urlConnection.setRequestProperty(
+          "Authorization", "Basic " + new String(Base64.encodeBase64(authString.getBytes())));
+      return urlConnection.getInputStream();
+
+    } catch (IOException e) {
+      e.printStackTrace();
     }
 
-    private InputStream getFileDownloadStream(String location) {
-        final String link = location.replaceAll("\"", "");
-        final String authString = username + ":" + token;
-
-        try {
-            URL url = new URL(link);
-            URLConnection urlConnection = url.openConnection();
-
-            urlConnection.setRequestProperty("Authorization", "Basic " + new String(Base64.encodeBase64(authString.getBytes())));
-            return urlConnection.getInputStream();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-
+    return null;
+  }
 }

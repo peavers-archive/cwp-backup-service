@@ -16,33 +16,35 @@ import space.swordfish.silverstripe.service.silverstripe.domain.Transfer;
 @RequestMapping("/project")
 public class SnapshotController {
 
-    private final SilverstripeService silverstripeService;
+  private final SilverstripeService silverstripeService;
 
-    public SnapshotController(@Qualifier("silverstripeServiceImpl") SilverstripeService silverstripeService) {
-        this.silverstripeService = silverstripeService;
-    }
+  public SnapshotController(
+      @Qualifier("silverstripeServiceImpl") SilverstripeService silverstripeService) {
+    this.silverstripeService = silverstripeService;
+  }
 
-    @GetMapping("/{projectId}/snapshots")
-    @ResponseBody
-    public Flux<Snapshot> listAllSnapshots(@PathVariable String projectId) {
-        log.info("listAllSnapshots {}", projectId);
+  @GetMapping("/{projectId}/snapshots")
+  @ResponseBody
+  public Flux<Snapshot> listAllSnapshots(@PathVariable String projectId) {
+    log.info("listAllSnapshots {}", projectId);
 
-        return this.silverstripeService.listAllSnapshots(projectId);
-    }
+    return this.silverstripeService.listAllSnapshots(projectId);
+  }
 
-    @PostMapping("/{projectId}/snapshots")
-    @ResponseBody
-    public Mono<Transfer> createSnapshot(@RequestBody SnapshotRequest snapshotRequest) {
-        log.info("createSnapshot {}", snapshotRequest);
+  @PostMapping("/{projectId}/snapshots")
+  @ResponseBody
+  public Mono<Transfer> createSnapshot(@RequestBody SnapshotRequest snapshotRequest) {
+    log.info("createSnapshot {}", snapshotRequest);
 
-        return this.silverstripeService.createSnapshot(snapshotRequest);
-    }
+    return this.silverstripeService.createSnapshot(snapshotRequest);
+  }
 
-    @DeleteMapping("/{projectId}/snapshots/{snapshotId}")
-    @ResponseBody
-    public Mono<String> deleteSnapshot(@PathVariable String projectId, @PathVariable String snapshotId) {
-        log.info("deleteSnapshot {}:{}", projectId, snapshotId);
+  @DeleteMapping("/{projectId}/snapshots/{snapshotId}")
+  @ResponseBody
+  public Mono<String> deleteSnapshot(
+      @PathVariable String projectId, @PathVariable String snapshotId) {
+    log.info("deleteSnapshot {}:{}", projectId, snapshotId);
 
-        return this.silverstripeService.deleteSnapshot(projectId, snapshotId);
-    }
+    return this.silverstripeService.deleteSnapshot(projectId, snapshotId);
+  }
 }

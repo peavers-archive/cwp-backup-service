@@ -12,38 +12,37 @@ import space.swordfish.silverstripe.client.service.Upload;
 @Slf4j
 @Controller
 public class SilverstripeController {
+  private final Create create;
+  private final Delete delete;
+  private final Upload upload;
 
-    private final Create create;
-    private final Delete delete;
-    private final Upload upload;
+  public SilverstripeController(Create create, Delete delete, Upload upload) {
+    this.create = create;
+    this.delete = delete;
+    this.upload = upload;
+  }
 
-    public SilverstripeController(Create create, Delete delete, Upload upload) {
-        this.create = create;
-        this.delete = delete;
-        this.upload = upload;
-    }
+  @GetMapping("/create")
+  @ResponseBody
+  public Mono<String> create() {
+    create.process("prod", "db");
 
-    @GetMapping("/create")
-    @ResponseBody
-    public Mono<String> create() {
-        create.process("prod", "db");
+    return Mono.just("creating...");
+  }
 
-        return Mono.just("creating...");
-    }
+  @GetMapping("/delete")
+  @ResponseBody
+  public Mono<String> delete() {
+    delete.process();
 
-    @GetMapping("/delete")
-    @ResponseBody
-    public Mono<String> delete() {
-        delete.process();
+    return Mono.just("deleting...");
+  }
 
-        return Mono.just("deleting...");
-    }
+  @GetMapping("/upload")
+  @ResponseBody
+  public Mono<String> upload() {
+    upload.process();
 
-    @GetMapping("/upload")
-    @ResponseBody
-    public Mono<String> upload() {
-        upload.process();
-
-        return Mono.just("uploading...");
-    }
+    return Mono.just("uploading...");
+  }
 }

@@ -12,27 +12,26 @@ import javax.annotation.PostConstruct;
 @Component
 public class CreateAutoTask {
 
-    private final Create create;
+  private final Create create;
 
-    private final ThreadPoolTaskScheduler taskScheduler;
+  private final ThreadPoolTaskScheduler taskScheduler;
 
-    public CreateAutoTask(Create create, ThreadPoolTaskScheduler taskScheduler) {
-        this.create = create;
-        this.taskScheduler = taskScheduler;
+  public CreateAutoTask(Create create, ThreadPoolTaskScheduler taskScheduler) {
+    this.create = create;
+    this.taskScheduler = taskScheduler;
+  }
+
+  @PostConstruct
+  public void scheduleRunnableWithCronTrigger() {
+    CronTrigger cronTrigger = new CronTrigger("0 0 20 1/1 * ?");
+    taskScheduler.schedule(new RunnableTask(), cronTrigger);
+  }
+
+  class RunnableTask implements Runnable {
+
+    @Override
+    public void run() {
+      create.process("prod", "db");
     }
-
-    @PostConstruct
-    public void scheduleRunnableWithCronTrigger() {
-        CronTrigger cronTrigger = new CronTrigger("0 0 20 1/1 * ?");
-        taskScheduler.schedule(new RunnableTask(), cronTrigger);
-    }
-
-    class RunnableTask implements Runnable {
-
-        @Override
-        public void run() {
-            create.process("prod", "db");
-        }
-
-    }
+  }
 }

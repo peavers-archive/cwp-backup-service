@@ -12,26 +12,26 @@ import javax.annotation.PostConstruct;
 @Component
 public class UploadAutoTask {
 
-    private final Upload upload;
+  private final Upload upload;
 
-    private final ThreadPoolTaskScheduler taskScheduler;
+  private final ThreadPoolTaskScheduler taskScheduler;
 
-    public UploadAutoTask(Upload upload, ThreadPoolTaskScheduler taskScheduler) {
-        this.upload = upload;
-        this.taskScheduler = taskScheduler;
+  public UploadAutoTask(Upload upload, ThreadPoolTaskScheduler taskScheduler) {
+    this.upload = upload;
+    this.taskScheduler = taskScheduler;
+  }
+
+  @PostConstruct
+  public void scheduleRunnableWithCronTrigger() {
+    CronTrigger cronTrigger = new CronTrigger("0 0 23 1/1 * ?");
+    taskScheduler.schedule(new RunnableTask(), cronTrigger);
+  }
+
+  class RunnableTask implements Runnable {
+
+    @Override
+    public void run() {
+      upload.process();
     }
-
-    @PostConstruct
-    public void scheduleRunnableWithCronTrigger() {
-        CronTrigger cronTrigger = new CronTrigger("0 0 23 1/1 * ?");
-        taskScheduler.schedule(new RunnableTask(), cronTrigger);
-    }
-
-    class RunnableTask implements Runnable {
-
-        @Override
-        public void run() {
-            upload.process();
-        }
-    }
+  }
 }

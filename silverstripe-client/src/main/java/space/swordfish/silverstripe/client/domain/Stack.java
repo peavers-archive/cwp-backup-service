@@ -14,7 +14,7 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Type("stacks")
 public class Stack {
-    String name;
-    String title;
-    String created;
+  String name;
+  String title;
+  String created;
 }

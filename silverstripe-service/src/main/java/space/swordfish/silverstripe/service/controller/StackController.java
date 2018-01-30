@@ -13,17 +13,16 @@ import space.swordfish.silverstripe.service.silverstripe.domain.Stack;
 @Controller
 public class StackController {
 
-    private final SilverstripeService silverstripeService;
+  private final SilverstripeService silverstripeService;
 
-    public StackController(@Qualifier("silverstripeServiceImpl") SilverstripeService silverstripeService) {
-        this.silverstripeService = silverstripeService;
-    }
+  public StackController(
+      @Qualifier("silverstripeServiceImpl") SilverstripeService silverstripeService) {
+    this.silverstripeService = silverstripeService;
+  }
 
-    @GetMapping("/projects")
-    @ResponseBody
-    public Flux<Stack> listAllStacks() {
-        return this.silverstripeService.listAllStacks();
-    }
-
-
+  @GetMapping("/projects")
+  @ResponseBody
+  public Flux<Stack> listAllStacks() {
+    return this.silverstripeService.listAllStacks();
+  }
 }

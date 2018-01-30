@@ -9,12 +9,11 @@ import space.swordfish.silverstripe.service.silverstripe.domain.Transfer;
 
 public interface SilverstripeService {
 
-    Flux<Stack> listAllStacks();
+  Flux<Stack> listAllStacks();
 
-    Flux<Snapshot> listAllSnapshots(String projectId);
+  Flux<Snapshot> listAllSnapshots(String projectId);
 
-    Mono<String> deleteSnapshot(String projectId, String snapshotId);
+  Mono<String> deleteSnapshot(String projectId, String snapshotId);
 
-    Mono<Transfer> createSnapshot(SnapshotRequest snapshotRequest);
+  Mono<Transfer> createSnapshot(SnapshotRequest snapshotRequest);
 }
-

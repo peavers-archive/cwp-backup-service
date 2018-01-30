@@ -14,5 +14,5 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Type("transfers")
 public class Transfer extends BaseResource {
-    String status;
+  String status;
 }

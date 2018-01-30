@@ -11,37 +11,35 @@ import org.springframework.stereotype.Service;
 @Service
 public class SlackServiceImpl implements SlackService {
 
-    @Value(value = "${slack.channel}")
-    private String slackChannel;
+  private final SlackSession slackSession;
+  @Value(value = "${slack.channel}")
+  private String slackChannel;
 
-    private final SlackSession slackSession;
+  public SlackServiceImpl(SlackSession slackSession) {
+    this.slackSession = slackSession;
+  }
 
-    public SlackServiceImpl(SlackSession slackSession) {
-        this.slackSession = slackSession;
+  @Override
+  public void message(String message, SlackAttachment slackAttachment) {
+
+    SlackChannel channel = slackSession.findChannelByName(slackChannel);
+
+    if (slackAttachment != null) {
+      slackSession.sendMessage(channel, null, slackAttachment);
+    } else {
+      slackSession.sendMessage(channel, message);
     }
+  }
 
-    @Override
-    public void message(String message, SlackAttachment slackAttachment) {
+  @Override
+  public void snapshotComplete(String projectId, String link, String mode, String environment) {
+    SlackAttachment slackAttachment = new SlackAttachment();
+    slackAttachment.setColor("#36a64f");
 
-        SlackChannel channel = slackSession.findChannelByName(slackChannel);
+    slackAttachment.setAuthorName(projectId);
+    slackAttachment.setTitle(environment + " " + mode);
+    slackAttachment.setTitleLink(link);
 
-        if (slackAttachment != null) {
-            slackSession.sendMessage(channel, null, slackAttachment);
-        } else {
-            slackSession.sendMessage(channel, message);
-        }
-
-    }
-
-    @Override
-    public void snapshotComplete(String projectId, String link, String mode, String environment) {
-        SlackAttachment slackAttachment = new SlackAttachment();
-        slackAttachment.setColor("#36a64f");
-
-        slackAttachment.setAuthorName(projectId);
-        slackAttachment.setTitle(environment + " " + mode);
-        slackAttachment.setTitleLink(link);
-
-        message(projectId, slackAttachment);
-    }
+    message(projectId, slackAttachment);
+  }
 }

@@ -11,22 +11,22 @@ import java.io.IOException;
 @Configuration
 public class SlackConfiguration {
 
-    @Value(value = "${slack.token}")
-    private String token;
+  @Value(value = "${slack.token}")
+  private String token;
 
-    @Value(value = "${slack.channel}")
-    private String slackChannel;
+  @Value(value = "${slack.channel}")
+  private String slackChannel;
 
-    @Bean
-    public SlackSession slackSession() {
-        SlackSession webSocketSlackSession = SlackSessionFactory.createWebSocketSlackSession(token);
+  @Bean
+  public SlackSession slackSession() {
+    SlackSession webSocketSlackSession = SlackSessionFactory.createWebSocketSlackSession(token);
 
-        try {
-            webSocketSlackSession.connect();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return webSocketSlackSession;
+    try {
+      webSocketSlackSession.connect();
+    } catch (IOException e) {
+      e.printStackTrace();
     }
+
+    return webSocketSlackSession;
+  }
 }

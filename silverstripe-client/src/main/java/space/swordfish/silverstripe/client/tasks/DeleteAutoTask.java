@@ -12,27 +12,26 @@ import javax.annotation.PostConstruct;
 @Component
 public class DeleteAutoTask {
 
-    private final Delete delete;
+  private final Delete delete;
 
-    private final ThreadPoolTaskScheduler taskScheduler;
+  private final ThreadPoolTaskScheduler taskScheduler;
 
-    public DeleteAutoTask(Delete delete, ThreadPoolTaskScheduler taskScheduler) {
-        this.delete = delete;
-        this.taskScheduler = taskScheduler;
+  public DeleteAutoTask(Delete delete, ThreadPoolTaskScheduler taskScheduler) {
+    this.delete = delete;
+    this.taskScheduler = taskScheduler;
+  }
+
+  @PostConstruct
+  public void scheduleRunnableWithCronTrigger() {
+    CronTrigger cronTrigger = new CronTrigger("0 0 19 1/1 * ?");
+    taskScheduler.schedule(new RunnableTask(), cronTrigger);
+  }
+
+  class RunnableTask implements Runnable {
+
+    @Override
+    public void run() {
+      delete.process();
     }
-
-    @PostConstruct
-    public void scheduleRunnableWithCronTrigger() {
-        CronTrigger cronTrigger = new CronTrigger("0 0 19 1/1 * ?");
-        taskScheduler.schedule(new RunnableTask(), cronTrigger);
-    }
-
-    class RunnableTask implements Runnable {
-
-        @Override
-        public void run() {
-            delete.process();
-        }
-
-    }
+  }
 }

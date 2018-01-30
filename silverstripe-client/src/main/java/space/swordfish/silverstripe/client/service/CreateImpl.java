@@ -12,28 +12,32 @@ import space.swordfish.silverstripe.client.domain.Stack;
 @Service
 public class CreateImpl implements Create {
 
-    private final WebClient webClient;
+  private final WebClient webClient;
 
-    public CreateImpl(WebClient webClient) {
-        this.webClient = webClient;
-    }
+  public CreateImpl(WebClient webClient) {
+    this.webClient = webClient;
+  }
 
-    @Override
-    public void process(String environment, String mode) {
-        webClient
-                .get()
-                .uri("/projects")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .flatMapMany(response -> response.bodyToFlux(Stack.class))
+  @Override
+  public void process(String environment, String mode) {
+    webClient
+        .get()
+        .uri("/projects")
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .flatMapMany(response -> response.bodyToFlux(Stack.class))
 
-                // for each stack
-                .flatMap(stack -> webClient
-                        .post()
-                        .uri("/project/{project_id}/snapshots", stack.getName())
-                        .accept(MediaType.APPLICATION_JSON)
-                        .body(BodyInserters.fromObject(new SnapshotRequest(stack.getName(), environment, mode)))
-                        .exchange())
-                .subscribe(System.out::println);
-    }
+        // for each stack
+        .flatMap(
+            stack ->
+                webClient
+                    .post()
+                    .uri("/project/{project_id}/snapshots", stack.getName())
+                    .accept(MediaType.APPLICATION_JSON)
+                    .body(
+                        BodyInserters.fromObject(
+                            new SnapshotRequest(stack.getName(), environment, mode)))
+                    .exchange())
+        .subscribe(System.out::println);
+  }
 }
