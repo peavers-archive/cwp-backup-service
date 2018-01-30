@@ -36,7 +36,7 @@ after_success:
   - docker push $CONFIG:$TAG
 
   # SILVERSTRIPE SERVICE
-  - export CONFIG=peavers/silverstripe-client
+  - export CONFIG=peavers/silverstripe-service
   - docker build -t $CONFIG ./silverstripe-service
   - docker tag $CONFIG:$TAG $CONFIG:$TAG
   - docker push $CONFIG:$TAG
