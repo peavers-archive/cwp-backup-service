@@ -19,13 +19,13 @@ allprojects {
         maven { url "https://repo.spring.io/milestone" }
         maven { url 'https://jitpack.io' }
     }
-
-    apply plugin: 'java'
-    apply plugin: 'org.springframework.boot'
-    apply plugin: 'io.spring.dependency-management'
 }
 
 subprojects {
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+
     group = 'space.swordfish'
     version = '1.0'
     sourceCompatibility = 1.8
