@@ -2,6 +2,7 @@ package space.swordfish.silverstripe.service.silverstripe;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.jasminb.jsonapi.ResourceConverter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -11,6 +12,7 @@ import space.swordfish.silverstripe.service.silverstripe.domain.Transfer;
 
 import java.util.List;
 
+@Slf4j
 public class ClientResource {
 
   Mono<Transfer> transformPayloadToTransfer(ResponseEntity<String> payload) {

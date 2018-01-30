@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import space.swordfish.silverstripe.client.domain.Snapshot;
 import space.swordfish.silverstripe.client.domain.Stack;
 
 import java.io.IOException;
@@ -31,7 +32,6 @@ public class UploadImpl implements Upload {
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .flatMapMany(clientResponse -> clientResponse.bodyToFlux(Stack.class))
-        .log()
 
         // for each stack
         .flatMap(
@@ -41,23 +41,22 @@ public class UploadImpl implements Upload {
                     .uri("/project/{project_id}/snapshots", stack.getName())
                     .accept(MediaType.APPLICATION_JSON)
                     .exchange()
-                    .flatMap(response -> response.toEntity(String.class))
-                    .flatMapMany(this::transformPayloadToSnapshot)
+                    .flatMapMany(response -> response.toEntity(String.class))
+                    .flatMap(this::transformPayloadToSnapshot)
 
                     // for each snapshot
                     .flatMap(
-                        downloadLink ->
+                        snapshot ->
                             webClient
                                 .post()
                                 .uri("/amazon/{projectId}/upload", stack.getName())
                                 .accept(MediaType.APPLICATION_JSON)
-                                .body(BodyInserters.fromObject(downloadLink))
+                                .body(BodyInserters.fromObject(snapshot))
                                 .exchange()))
-        .flatMap(downloadLink -> downloadLink.bodyToFlux(String.class))
-        .subscribe(System.out::println);
+        .subscribe();
   }
 
-  private Mono<String> transformPayloadToSnapshot(ResponseEntity<String> payload) {
+  private Mono<Snapshot> transformPayloadToSnapshot(ResponseEntity<String> payload) {
     ObjectMapper objectMapper = new ObjectMapper();
 
     try {
@@ -65,9 +64,12 @@ public class UploadImpl implements Upload {
       JsonNode links = node.findValue("links");
       JsonNode linksLinks = links.findValue("links");
       JsonNode downloadLink = linksLinks.findValue("download_link");
-      JsonNode href = downloadLink.findValue("href");
+      String href = downloadLink.findValue("href").textValue();
 
-      return Mono.just(href.toString());
+      String mode = node.findValue("mode").textValue();
+      String size = node.findValue("size").textValue();
+
+      return Mono.just(Snapshot.builder().size(size).mode(mode).href(href).build());
 
     } catch (IOException e) {
       e.printStackTrace();
