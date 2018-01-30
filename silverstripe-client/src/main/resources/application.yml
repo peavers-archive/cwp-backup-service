@@ -1,6 +1,6 @@
 spring:
   application:
-    name: instance-service
+    name: silverstripe-client
 
 server:
   port: 9090

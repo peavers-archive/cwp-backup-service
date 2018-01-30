@@ -1,9 +1,5 @@
 jar {
     baseName = 'silverstripe-client'
-
-    manifest {
-        attributes("Main-Class": "space.swordfish.silverstripe.client.SilverstripeClientApplication")
-    }
 }
 
 dependencies {
