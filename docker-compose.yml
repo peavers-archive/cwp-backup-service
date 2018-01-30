@@ -1,0 +1,33 @@
+version: '2'
+services:
+
+  silverstripe-client:
+    container_name: silverstripe-client
+    image: peavers/silverstripe-client
+    restart: always
+    ports:
+      - 80:9090
+    environment:
+    - TZ=Pacific/Auckland
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
+
+  silverstripe-service:
+    container_name: silverstripe-service
+    image: peavers/silverstripe-service
+    restart: always
+    ports:
+    - 8080:8080
+    environment:
+    - TZ=Pacific/Auckland
+    - SLACK_TOKEN=
+    - SLACK_CHANNEL=
+    - SILVERSTRIPE_USERNAME=
+    - SILVERSTRIPE_TOKEN=
+    - AWS_BUCKET=
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
