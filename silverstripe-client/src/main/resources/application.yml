@@ -4,3 +4,13 @@ spring:
 
 server:
   port: 9090
+
+silverstripe:
+  service: http://localhost:8080
+
+---
+spring:
+  profiles: docker
+
+silverstripe:
+  service: http://silverstripe-service:8080
