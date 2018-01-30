@@ -11,6 +11,7 @@ import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.amazonaws.services.s3.transfer.Upload;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.http.client.fluent.Request;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,12 +21,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import reactor.core.publisher.Mono;
 import space.swordfish.silverstripe.service.service.SlackService;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.time.LocalDate;
 
 @Slf4j
 @Controller
@@ -48,9 +49,21 @@ public class AmazonController {
     public Mono<String> upload(@PathVariable String projectId, @RequestBody String downloadLink)
             throws IOException {
 
-        sendToBucket(projectId + "/" + LocalDate.now() + ".sspak", getInputStream(downloadLink));
+
+        getFile(downloadLink, projectId);
+
+//        sendToBucket(projectId + "/" + LocalDate.now() + ".sspak", getInputStream(downloadLink));
 
         return Mono.just(downloadLink);
+    }
+
+    private void getFile(String location, String projectId) throws IOException {
+        final String link = location.replaceAll("\"", "");
+        final String authString = username + ":" + token;
+
+        Request.Get(link)
+                .addHeader("Authorization", "Basic " + new String(Base64.encodeBase64(authString.getBytes())))
+                .execute().saveContent(new File("/tmp/" + projectId + ".sspak"));
     }
 
     private void sendToBucket(String key, InputStream inputStream) {
@@ -66,7 +79,6 @@ public class AmazonController {
         } catch (InterruptedException | URISyntaxException e) {
             e.printStackTrace();
         }
-
     }
 
     private InputStream getInputStream(String location) throws IOException {

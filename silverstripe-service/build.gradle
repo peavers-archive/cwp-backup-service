@@ -18,7 +18,10 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-webflux')
 
     compile ('com.amazonaws:aws-java-sdk-s3')
+// https://mvnrepository.com/artifact/org.apache.httpcomponents/fluent-hc
+    compile group: 'org.apache.httpcomponents', name: 'fluent-hc', version: '4.5.5'
 
+    compile('com.github.alexmojaki:s3-stream-upload:1.0.1')
     compile('com.github.Ullink:simple-slack-api:1.2.0')
     compile('commons-io:commons-io:2.6')
     compile('com.github.jasminb:jsonapi-converter:0.8')
