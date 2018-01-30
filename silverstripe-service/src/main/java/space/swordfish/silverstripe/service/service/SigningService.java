@@ -1,13 +1,5 @@
 package space.swordfish.silverstripe.service.service;
 
-import java.io.ByteArrayInputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.Optional;
-
 import software.amazon.awssdk.core.client.builder.ClientHttpConfiguration;
 import software.amazon.awssdk.core.config.ClientOverrideConfiguration;
 import software.amazon.awssdk.core.exception.SdkClientException;
@@ -16,20 +8,18 @@ import software.amazon.awssdk.core.interceptor.ExecutionAttributes;
 import software.amazon.awssdk.core.interceptor.ExecutionInterceptor;
 import software.amazon.awssdk.core.interceptor.InterceptorContext;
 import software.amazon.awssdk.core.regions.Region;
-import software.amazon.awssdk.http.Abortable;
-import software.amazon.awssdk.http.AbortableCallable;
-import software.amazon.awssdk.http.AbortableInputStream;
-import software.amazon.awssdk.http.SdkHttpClient;
-import software.amazon.awssdk.http.SdkHttpConfigurationOption;
-import software.amazon.awssdk.http.SdkHttpFullRequest;
-import software.amazon.awssdk.http.SdkHttpFullRequest.Builder;
-import software.amazon.awssdk.http.SdkHttpFullResponse;
-import software.amazon.awssdk.http.SdkRequestContext;
+import software.amazon.awssdk.http.*;
 import software.amazon.awssdk.services.s3.AwsS3V4Signer;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3ClientBuilder;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.utils.http.SdkHttpUtils;
+
+import java.io.ByteArrayInputStream;
+import java.net.URI;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.Optional;
 
 public class SigningService {
 
@@ -69,7 +59,7 @@ public class SigningService {
         public AbortableCallable<SdkHttpFullResponse> prepareRequest(SdkHttpFullRequest request, SdkRequestContext requestContext) {
             return new AbortableCallable<SdkHttpFullResponse>() {
                 @Override
-                public SdkHttpFullResponse call() throws Exception {
+                public SdkHttpFullResponse call() {
                     return SdkHttpFullResponse.builder().statusCode(200).content(new AbortableInputStream(new ByteArrayInputStream(new byte[0]), new Abortable() {
 
                         @Override
