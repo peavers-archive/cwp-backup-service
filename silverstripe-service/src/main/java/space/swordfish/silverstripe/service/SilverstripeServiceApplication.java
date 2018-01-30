@@ -10,4 +10,3 @@ public class SilverstripeServiceApplication {
         SpringApplication.run(SilverstripeServiceApplication.class, args);
     }
 }
-
