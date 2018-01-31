@@ -19,7 +19,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Calendar;
+import java.time.Duration;
 import java.util.Date;
 
 @Service
@@ -90,13 +90,9 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
   }
 
   private Date signUrlExpiry() {
-    Calendar calendar = Calendar.getInstance();
-    calendar.add(Calendar.DAY_OF_MONTH, 7);
-    calendar.getTime();
-
     java.util.Date expiration = new java.util.Date();
 
-    expiration.setTime(calendar.getTimeInMillis());
+    expiration.setTime(Duration.ofDays(7).toMillis());
 
     return expiration;
   }
