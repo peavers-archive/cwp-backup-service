@@ -25,6 +25,7 @@ public class SilverstripeController {
   @GetMapping("/create")
   @ResponseBody
   public Mono<String> create() {
+    create.process("prod", "assets");
     create.process("prod", "db");
 
     return Mono.just("creating...");

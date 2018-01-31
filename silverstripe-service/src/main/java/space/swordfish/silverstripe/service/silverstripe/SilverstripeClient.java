@@ -64,6 +64,9 @@ public class SilverstripeClient extends ClientResource {
   }
 
   public Mono<String> deleteSnapshot(String projectId, String snapshotId) {
+
+    log.info("Project {}, Snapshot {}", projectId, snapshotId);
+
     return this.webClient
         .delete()
         .uri("/naut/project/{project_id}/snapshots/{snapshot_id}", projectId, snapshotId)

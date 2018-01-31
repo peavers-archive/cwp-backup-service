@@ -61,9 +61,9 @@ public class DeleteImpl implements Delete {
 
     try {
       JsonNode node = objectMapper.readTree(payload.getBody());
-      JsonNode id = node.findValue("id");
+      String id = node.findValue("id").textValue();
 
-      return Mono.just(id.toString());
+      return Mono.just(id);
 
     } catch (IOException e) {
       e.printStackTrace();

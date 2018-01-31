@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Calendar;
 
 @Slf4j
 @Controller
@@ -94,10 +95,12 @@ public class AmazonController {
   private String generateSignedUrl(String objectKey) throws URISyntaxException {
     AmazonS3 client = AmazonS3ClientBuilder.defaultClient();
 
+    Calendar calendar = Calendar.getInstance();
+    calendar.add(Calendar.DAY_OF_MONTH, 7);
+    calendar.getTime();
+
     java.util.Date expiration = new java.util.Date();
-    long msec = expiration.getTime();
-    msec += 1000 * 60 * 60; // 1 hour.
-    expiration.setTime(msec);
+    expiration.setTime(calendar.getTimeInMillis());
 
     GeneratePresignedUrlRequest generatePresignedUrlRequest =
         new GeneratePresignedUrlRequest(bucket, objectKey);

@@ -31,6 +31,7 @@ public class CreateAutoTask {
 
     @Override
     public void run() {
+      create.process("prod", "assets");
       create.process("prod", "db");
     }
   }
