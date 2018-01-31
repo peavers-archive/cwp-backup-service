@@ -19,6 +19,7 @@ public class Snapshot extends BaseResource {
   String mode;
   String size;
   String href;
+  String project;
 
   @JsonProperty("can_download")
   String canDownload;
