@@ -29,7 +29,7 @@ public class DeleteImpl implements Delete {
     while (executeCount > 1) {
 
       try {
-        Thread.sleep(Duration.ofMillis(1000).toMillis());
+        Thread.sleep(Duration.ofMillis(5000).toMillis());
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
