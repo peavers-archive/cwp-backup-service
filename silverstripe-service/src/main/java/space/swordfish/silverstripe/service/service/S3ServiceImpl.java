@@ -9,9 +9,8 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.amazonaws.services.s3.transfer.Upload;
-import org.apache.commons.codec.binary.Base64;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import space.swordfish.silverstripe.service.configuration.StorageConfiguration;
 import space.swordfish.silverstripe.service.silverstripe.domain.Snapshot;
 
 import javax.mail.MessagingException;
@@ -27,98 +26,87 @@ import java.util.Date;
 @Service
 public class S3ServiceImpl implements S3Service {
 
-  @Value(value = "${silverstripe.username}")
-  private String username;
+    private final StorageConfiguration storageConfiguration;
 
-  @Value(value = "${silverstripe.token}")
-  private String token;
+    private final MessageService messageService;
 
-  @Value(value = "${aws.bucket}")
-  private String bucket;
-
-  private final SlackService slackService;
-
-  private final SESService SESService;
-
-  public S3ServiceImpl(SlackService slackService, SESService SESService) {
-    this.slackService = slackService;
-    this.SESService = SESService;
-  }
-
-  @Override
-  public void upload(Snapshot snapshot) throws UnsupportedEncodingException, MessagingException {
-    String key = snapshot.getProject() + "/" + snapshot.getMode() + ".sspak";
-    String link = snapshot.getHref();
-    long contentSize = Long.valueOf(snapshot.getSize());
-
-    InputStream inputStream = null;
-    try {
-      inputStream = getInputStream(link);
-    } catch (IOException e) {
-      e.printStackTrace();
+    public S3ServiceImpl(StorageConfiguration storageConfiguration, MessageService messageService) {
+        this.storageConfiguration = storageConfiguration;
+        this.messageService = messageService;
     }
 
-    ObjectMetadata objectMetadata = new ObjectMetadata();
-    objectMetadata.setContentLength(contentSize);
+    @Override
+    public void upload(Snapshot snapshot) throws UnsupportedEncodingException, MessagingException {
+        String key = snapshot.getProject() + "/" + snapshot.getMode() + ".sspak";
+        String link = snapshot.getHref();
+        long contentSize = Long.valueOf(snapshot.getSize());
 
-    PutObjectRequest putObjectRequest =
-        new PutObjectRequest(bucket, key, inputStream, objectMetadata);
+        InputStream inputStream = null;
+        try {
+            inputStream = getInputStream(link);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-    TransferManager transferManager = TransferManagerBuilder.defaultTransferManager();
-    Upload upload = transferManager.upload(putObjectRequest);
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentLength(contentSize);
 
-    try {
-      String signUrl = signUrl(upload.waitForUploadResult().getKey());
+        PutObjectRequest putObjectRequest =
+                new PutObjectRequest(storageConfiguration.getBucket(), key, inputStream, objectMetadata);
 
-      String bodyHtml =
-          "<html>" + "<head></head>" + "<body>" + "<a>" + signUrl + "</a>" + "</body>" + "</html>";
+        TransferManager transferManager = TransferManagerBuilder.defaultTransferManager();
+        Upload upload = transferManager.upload(putObjectRequest);
 
-      SESService.send("Nightly snapshot for " + snapshot.getProject(), bodyHtml);
-      slackService.snapshotComplete(key, signUrl, snapshot.getMode(), "production");
+        try {
+            String signUrl = signUrl(upload.waitForUploadResult().getKey());
 
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
-  }
+            String bodyHtml =
+                    "<html>" + "<head></head>" + "<body>" + "<a>" + signUrl + "</a>" + "</body>" + "</html>";
 
-  private String signUrl(String objectKey) {
-    AmazonS3 client = AmazonS3ClientBuilder.defaultClient();
+            messageService.email("Nightly snapshot for " + snapshot.getProject(), bodyHtml);
+            messageService.slack(key, signUrl, snapshot.getMode(), "production");
 
-    GeneratePresignedUrlRequest generatePresignedUrlRequest =
-        new GeneratePresignedUrlRequest(bucket, objectKey);
-    generatePresignedUrlRequest.setMethod(HttpMethod.GET);
-    generatePresignedUrlRequest.setExpiration(signUrlExpiry());
-
-    URL url = client.generatePresignedUrl(generatePresignedUrlRequest);
-
-    try {
-      return url.toURI().toString();
-    } catch (URISyntaxException e) {
-      e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
-    return null;
-  }
+    private String signUrl(String objectKey) {
+        AmazonS3 client = AmazonS3ClientBuilder.defaultClient();
 
-  private Date signUrlExpiry() {
-    Calendar calendar = Calendar.getInstance();
-    calendar.add(Calendar.DAY_OF_MONTH, 7);
-    calendar.getTime();
+        GeneratePresignedUrlRequest generatePresignedUrlRequest =
+                new GeneratePresignedUrlRequest(storageConfiguration.getBucket(), objectKey);
+        generatePresignedUrlRequest.setMethod(HttpMethod.GET);
+        generatePresignedUrlRequest.setExpiration(signUrlExpiry());
 
-    java.util.Date expiration = new java.util.Date();
-    expiration.setTime(calendar.getTimeInMillis());
+        URL url = client.generatePresignedUrl(generatePresignedUrlRequest);
 
-    return expiration;
-  }
+        try {
+            return url.toURI().toString();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
 
-  private InputStream getInputStream(String location) throws IOException {
-    final String authString = username + ":" + token;
+        return null;
+    }
 
-    URL url = new URL(location);
-    URLConnection urlConnection = url.openConnection();
-    urlConnection.setRequestProperty(
-        "Authorization", "Basic " + new String(Base64.encodeBase64(authString.getBytes())));
+    private Date signUrlExpiry() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, 7);
+        calendar.getTime();
 
-    return urlConnection.getInputStream();
-  }
+        java.util.Date expiration = new java.util.Date();
+        expiration.setTime(calendar.getTimeInMillis());
+
+        return expiration;
+    }
+
+    private InputStream getInputStream(String location) throws IOException {
+        URL url = new URL(location);
+        URLConnection urlConnection = url.openConnection();
+        urlConnection.setRequestProperty(
+                "Authorization", "Basic " + storageConfiguration.getAuth());
+
+        return urlConnection.getInputStream();
+    }
 }

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 public class SlackServiceImpl implements SlackService {
 
   private final SlackSession slackSession;
+
   @Value(value = "${slack.channel}")
   private String slackChannel;
 
