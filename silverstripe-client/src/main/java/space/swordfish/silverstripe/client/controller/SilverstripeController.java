@@ -3,6 +3,7 @@ package space.swordfish.silverstripe.client.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 import reactor.core.publisher.Mono;
 import space.swordfish.silverstripe.client.service.Create;
@@ -22,11 +23,10 @@ public class SilverstripeController {
     this.upload = upload;
   }
 
-  @GetMapping("/create")
+  @GetMapping("/create/{mode}")
   @ResponseBody
-  public Mono<String> create() {
-    create.process("prod", "assets");
-    create.process("prod", "db");
+  public Mono<String> create(@PathVariable String mode) {
+    create.process("prod", mode);
 
     return Mono.just("creating...");
   }
@@ -34,7 +34,7 @@ public class SilverstripeController {
   @GetMapping("/delete")
   @ResponseBody
   public Mono<String> delete() {
-    delete.process();
+    delete.process(10);
 
     return Mono.just("deleting...");
   }

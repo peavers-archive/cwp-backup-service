@@ -11,6 +11,7 @@ import space.swordfish.silverstripe.service.silverstripe.domain.Stack;
 import space.swordfish.silverstripe.service.silverstripe.domain.Transfer;
 
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 public class ClientResource {
@@ -20,7 +21,7 @@ public class ClientResource {
     ResourceConverter resourceConverter = new ResourceConverter(objectMapper, Transfer.class);
 
     Transfer transfer =
-        resourceConverter.readDocument(payload.getBody().getBytes(), Transfer.class).get();
+        resourceConverter.readDocument(Objects.requireNonNull(payload.getBody()).getBytes(), Transfer.class).get();
 
     return Mono.just(transfer);
   }
@@ -30,7 +31,7 @@ public class ClientResource {
     ResourceConverter resourceConverter = new ResourceConverter(objectMapper, Stack.class);
 
     List<Stack> stackList =
-        resourceConverter.readDocumentCollection(payload.getBody().getBytes(), Stack.class).get();
+        resourceConverter.readDocumentCollection(Objects.requireNonNull(payload.getBody()).getBytes(), Stack.class).get();
 
     return Flux.fromIterable(stackList);
   }
@@ -41,7 +42,7 @@ public class ClientResource {
 
     List<Snapshot> stackList =
         resourceConverter
-            .readDocumentCollection(payload.getBody().getBytes(), Snapshot.class)
+            .readDocumentCollection(Objects.requireNonNull(payload.getBody()).getBytes(), Snapshot.class)
             .get();
 
     return Flux.fromIterable(stackList);

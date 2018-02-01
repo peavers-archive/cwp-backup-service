@@ -7,16 +7,19 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import reactor.core.publisher.Mono;
-import space.swordfish.silverstripe.service.service.AmazonS3Service;
+import space.swordfish.silverstripe.service.service.S3Service;
 import space.swordfish.silverstripe.service.silverstripe.domain.Snapshot;
+
+import javax.mail.MessagingException;
+import java.io.UnsupportedEncodingException;
 
 @Slf4j
 @Controller
 public class AmazonController {
 
-  private final AmazonS3Service amazonS3Service;
+  private final S3Service amazonS3Service;
 
-  public AmazonController(AmazonS3Service amazonS3Service) {
+  public AmazonController(S3Service amazonS3Service) {
     this.amazonS3Service = amazonS3Service;
   }
 
@@ -26,8 +29,14 @@ public class AmazonController {
 
     snapshot.setProject(projectId);
 
-    amazonS3Service.upload(snapshot);
+      try {
+          amazonS3Service.upload(snapshot);
+      } catch (UnsupportedEncodingException e) {
+          e.printStackTrace();
+      } catch (MessagingException e) {
+          e.printStackTrace();
+      }
 
-    return Mono.just("No Deal!");
+      return Mono.just("No Deal!");
   }
 }

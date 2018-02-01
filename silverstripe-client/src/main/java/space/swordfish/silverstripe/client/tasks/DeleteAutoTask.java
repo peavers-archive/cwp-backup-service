@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import space.swordfish.silverstripe.client.service.Delete;
 
 import javax.annotation.PostConstruct;
-import java.time.Duration;
 
 @Slf4j
 @Component
@@ -32,18 +31,7 @@ public class DeleteAutoTask {
 
     @Override
     public void run() {
-      int runCounter = 100;
-      while (runCounter > 1) {
-
-        try {
-          Thread.sleep(Duration.ofSeconds(15).toMillis());
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
-
-        delete.process();
-        runCounter--;
-      }
+      delete.process(100);
     }
   }
 }

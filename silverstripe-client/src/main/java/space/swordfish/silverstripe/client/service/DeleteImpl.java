@@ -11,6 +11,7 @@ import reactor.core.publisher.Mono;
 import space.swordfish.silverstripe.client.domain.Stack;
 
 import java.io.IOException;
+import java.time.Duration;
 
 @Slf4j
 @Service
@@ -23,37 +24,49 @@ public class DeleteImpl implements Delete {
   }
 
   @Override
-  public void process() {
-    webClient
-        .get()
-        .uri("/projects")
-        .accept(MediaType.APPLICATION_JSON)
-        .exchange()
-        .flatMapMany(clientResponse -> clientResponse.bodyToFlux(Stack.class))
+  public void process(int executeCount) {
 
-        // for each stack
-        .flatMap(
-            stack ->
-                webClient
-                    .get()
-                    .uri("/project/{project_id}/snapshots", stack.getName())
-                    .accept(MediaType.APPLICATION_JSON)
-                    .exchange()
-                    .flatMap(response -> response.toEntity(String.class))
-                    .flatMapMany(this::transformPayloadToSnapshot)
+    while (executeCount > 1) {
 
-                    // for each snapshot
-                    .flatMap(
-                        id ->
-                            webClient
-                                .delete()
-                                .uri(
-                                    "/project/{project_id}/snapshots/{snapshot_id}",
-                                    stack.getName(),
-                                    id)
-                                .accept(MediaType.APPLICATION_JSON)
-                                .exchange()))
-        .subscribe(System.out::println);
+      try {
+        Thread.sleep(Duration.ofMillis(1000).toMillis());
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+
+      webClient
+          .get()
+          .uri("/projects")
+          .accept(MediaType.APPLICATION_JSON)
+          .exchange()
+          .flatMapMany(clientResponse -> clientResponse.bodyToFlux(Stack.class))
+
+          // for each stack
+          .flatMap(
+              stack ->
+                  webClient
+                      .get()
+                      .uri("/project/{project_id}/snapshots", stack.getName())
+                      .accept(MediaType.APPLICATION_JSON)
+                      .exchange()
+                      .flatMap(response -> response.toEntity(String.class))
+                      .flatMapMany(this::transformPayloadToSnapshot)
+
+                      // for each snapshot
+                      .flatMap(
+                          id ->
+                              webClient
+                                  .delete()
+                                  .uri(
+                                      "/project/{project_id}/snapshots/{snapshot_id}",
+                                      stack.getName(),
+                                      id)
+                                  .accept(MediaType.APPLICATION_JSON)
+                                  .exchange()))
+          .subscribe(System.out::println);
+
+      executeCount--;
+    }
   }
 
   private Mono<String> transformPayloadToSnapshot(ResponseEntity<String> payload) {

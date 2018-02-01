@@ -14,16 +14,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import space.swordfish.silverstripe.service.silverstripe.domain.Snapshot;
 
+import javax.mail.MessagingException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.time.Duration;
+import java.util.Calendar;
 import java.util.Date;
 
 @Service
-public class AmazonS3ServiceImpl implements AmazonS3Service {
+public class S3ServiceImpl implements S3Service {
 
   @Value(value = "${silverstripe.username}")
   private String username;
@@ -36,12 +38,15 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
 
   private final SlackService slackService;
 
-  public AmazonS3ServiceImpl(SlackService slackService) {
+  private final SESService SESService;
+
+  public S3ServiceImpl(SlackService slackService, SESService SESService) {
     this.slackService = slackService;
+    this.SESService = SESService;
   }
 
   @Override
-  public void upload(Snapshot snapshot) {
+  public void upload(Snapshot snapshot) throws UnsupportedEncodingException, MessagingException {
     String key = snapshot.getProject() + "/" + snapshot.getMode() + ".sspak";
     String link = snapshot.getHref();
     long contentSize = Long.valueOf(snapshot.getSize());
@@ -63,8 +68,14 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
     Upload upload = transferManager.upload(putObjectRequest);
 
     try {
-      slackService.snapshotComplete(
-          key, signUrl(upload.waitForUploadResult().getKey()), snapshot.getMode(), "production");
+      String signUrl = signUrl(upload.waitForUploadResult().getKey());
+
+      String bodyHtml =
+          "<html>" + "<head></head>" + "<body>" + "<a>" + signUrl + "</a>" + "</body>" + "</html>";
+
+      SESService.send("Nightly snapshot for " + snapshot.getProject(), bodyHtml);
+      slackService.snapshotComplete(key, signUrl, snapshot.getMode(), "production");
+
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
@@ -90,9 +101,12 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
   }
 
   private Date signUrlExpiry() {
-    java.util.Date expiration = new java.util.Date();
+    Calendar calendar = Calendar.getInstance();
+    calendar.add(Calendar.DAY_OF_MONTH, 7);
+    calendar.getTime();
 
-    expiration.setTime(Duration.ofDays(7).toMillis());
+    java.util.Date expiration = new java.util.Date();
+    expiration.setTime(calendar.getTimeInMillis());
 
     return expiration;
   }
