@@ -17,12 +17,9 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-actuator')
     compile('org.springframework.boot:spring-boot-starter-webflux')
 
-
-    compile group: 'javax.mail', name: 'mail', version: '1.4.1'
+    compile('javax.mail:mail:1.4.1')
     compile('com.amazonaws:aws-java-sdk-s3')
     compile('com.amazonaws:aws-java-sdk-ses')
-    compile('com.github.alexmojaki:s3-stream-upload:1.0.1')
     compile('com.github.Ullink:simple-slack-api:1.2.0')
-    compile('commons-io:commons-io:2.6')
     compile('com.github.jasminb:jsonapi-converter:0.8')
 }
