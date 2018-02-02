@@ -25,14 +25,11 @@ public class EmailConfiguration {
   private String recipients;
 
   public MimeMessage messageObject() throws MessagingException {
-
     Session session = Session.getDefaultInstance(new Properties());
     MimeMessage message = new MimeMessage(session);
 
     message.setFrom(new InternetAddress(sender));
     message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipients));
-
-    log.info("Message recipients set as : {}", recipients);
 
     return message;
   }
